@@ -98,14 +98,17 @@ if __name__ == "__main__":
         train_ds,
         batch_size=256,
         shuffle=True,
+        pin_memory=True
     )
 
     val_loader = DataLoader(
         val_ds,
         batch_size=256,
+        pin_memory=True
     )
 
-    model = Model()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = Model(input_dim=198).to(device)
     optimiser = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
     criterion = nn.TripletMarginLoss()
     early_stop = EarlyStopping(patience=10, model_name="model.pt")
@@ -114,8 +117,8 @@ if __name__ == "__main__":
     for epoch in range(10):
 
         print("Computing loss")
-        train_loss = train(model, train_loader, optimiser, criterion)
-        val_loss = val(model, val_loader, criterion)
+        train_loss = train(model, train_loader, optimiser, criterion, device)
+        val_loss = val(model, val_loader, criterion, device)
 
         print(f"Epoch [{epoch+1}/10] | Train loss: {train_loss:.2f} | Val loss: {val_loss:.2f}")
 

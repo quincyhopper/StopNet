@@ -1,6 +1,6 @@
 import torch
 
-def train(model, train_loader, optimiser, criterion):
+def train(model, train_loader, optimiser, criterion, device):
     model.train()
 
     total_loss = 0.0
@@ -8,9 +8,9 @@ def train(model, train_loader, optimiser, criterion):
     for batch in train_loader:
         optimiser.zero_grad()
 
-        anchor = model(batch['anchor'])
-        pos = model(batch['positive'])
-        neg = model(batch['negative'])
+        anchor = model(batch['anchor']).to(device)
+        pos = model(batch['positive']).to(device)
+        neg = model(batch['negative']).to(device)
 
         loss = criterion(anchor, pos, neg)
         total_loss += loss.item()
@@ -21,16 +21,16 @@ def train(model, train_loader, optimiser, criterion):
     return total_loss / len(train_loader)
 
 @torch.no_grad()
-def val(model, val_loader, criterion):
+def val(model, val_loader, criterion, device):
     model.eval()
 
     total_loss = 0.0
 
     for batch in val_loader:
 
-        anchor = model(batch['anchor'])
-        pos = model(batch['positive'])
-        neg = model(batch['negative'])
+        anchor = model(batch['anchor']).to(device)
+        pos = model(batch['positive']).to(device)
+        neg = model(batch['negative']).to(device)
         
         loss = criterion(anchor, pos, neg)
         total_loss += loss.item()
