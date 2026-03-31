@@ -48,7 +48,7 @@ class EarlyStopping:
 
     def step(self, model, loss: float, epoch: int ):
         if loss < self.best_score - self.delta:
-            self.best_score = loss
+            self.best_loss = loss
             self.count = 0
             self.best_epoch = epoch
             torch.save(model.state_dict(), self.model_name)
