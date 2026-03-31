@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F 
-import nltk
 import random
 from collections import defaultdict
 from datasets import load_dataset
 from datasets import Dataset as HFDataset
 from torch.utils.data import Dataset, DataLoader
+
 from training import train, val, EarlyStopping
 from model import Model
 
@@ -73,16 +72,6 @@ class TripleTextDataset(Dataset):
             }
 
 if __name__ == "__main__":
-
-    try:
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('stopwords')
-
-    try:
-        nltk.data.find('tokenizers/punkt_tab')
-    except LookupError:
-        nltk.download('punkt_tab')
 
     print("Loading processed dataset")
     dataset = load_dataset(path = 'parquet', data_files=['data/blogtext_processed.parquet'], split='train')

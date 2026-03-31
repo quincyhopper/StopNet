@@ -1,3 +1,4 @@
+import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from datasets import load_dataset
@@ -34,6 +35,16 @@ def filter_valid_authors(ds: Dataset, k: int):
     return ds.select(indices)
 
 if __name__ == "__main__":
+
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
+
+    try:
+        nltk.data.find('tokenizers/punkt_tab')
+    except LookupError:
+        nltk.download('punkt_tab')
 
     raw_data = [
         'data/blogtext_raw.parquet'
