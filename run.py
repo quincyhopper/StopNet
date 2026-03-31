@@ -7,7 +7,7 @@ from collections import defaultdict
 from datasets import load_dataset
 from datasets import Dataset as HFDataset
 from torch.utils.data import Dataset, DataLoader
-from training import train, val
+from training import train, val, EarlyStopping
 from model import Model
 
 def stratified_split(dataset, seed=42):
@@ -96,25 +96,34 @@ if __name__ == "__main__":
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=16,
+        batch_size=256,
         shuffle=True,
     )
 
     val_loader = DataLoader(
         val_ds,
-        batch_size=16,
+        batch_size=256,
     )
 
     model = Model()
     optimiser = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
     criterion = nn.TripletMarginLoss()
+    early_stop = EarlyStopping(patience=10, model_name="model.pt")
 
     print("Beginning training")
     for epoch in range(10):
 
         print("Computing loss")
         train_loss = train(model, train_loader, optimiser, criterion)
+        val_loss = val(model, val_loader, criterion)
 
-        print(f"Epoch [{epoch+1}/10] | Train loss: {train_loss:.2f} | Val loss:")
+        print(f"Epoch [{epoch+1}/10] | Train loss: {train_loss:.2f} | Val loss: {val_loss:.2f}")
+
+        stop = early_stop.step(model, val_loss, epoch)
+        if stop:
+            print("Early stopping triggered. Training terminated at epoch {epoch}.")
+            break
+
+    print("Training complete")
 
     
