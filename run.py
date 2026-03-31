@@ -9,25 +9,20 @@ from torch.utils.data import Dataset, DataLoader
 from training import train, val, EarlyStopping
 from model import Model
 
-def stratified_split(dataset, seed=42):
+def split_data(dataset, train=0.8, val=0.1, seed=42):
     random.seed(seed)
+    authors = list(set(dataset['author']))
+    random.shuffle(authors)
 
-    label_to_indices = defaultdict(list)
-    for idx, label in enumerate(dataset["author"]):
-        label_to_indices[label].append(idx)
-
-    train_idx, val_idx, test_idx = [], [], []
-
-    for indices in label_to_indices.values():
-        random.shuffle(indices)
-        test_idx.append(indices[0])
-        val_idx.append(indices[1])
-        train_idx.extend(indices[2:])  # empty for authors with exactly 2 texts
+    n = len(authors)
+    train_authors = set(authors[:int(n * train)])
+    val_authors = set(authors[int(n * train) : int(n * (train+val))])
+    test_authors = set(authors[int(n * (train+val)):])
 
     return (
-        dataset.select(train_idx),
-        dataset.select(val_idx),
-        dataset.select(test_idx),
+        dataset.filter(lambda x: x['author'] in train_authors),
+        dataset.filter(lambda x: x['author'] in val_authors),
+        dataset.filter(lambda x: x['author'] in test_authors)
     )
 
 class TripleTextDataset(Dataset):
@@ -76,7 +71,7 @@ if __name__ == "__main__":
     dataset = load_dataset(path = 'parquet', data_files=['data/blogtext_processed.parquet'], split='train')
 
     print("Splitting data.. ")
-    train_split, val_split, test_split = stratified_split(dataset)
+    train_split, val_split, test_split = split_data(dataset)
 
     print("Building TripleTextDatasets")
     train_ds = TripleTextDataset(train_split)
