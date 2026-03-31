@@ -8,9 +8,9 @@ def train(model, train_loader, optimiser, criterion, device):
     for batch in train_loader:
         optimiser.zero_grad()
 
-        anchor = model(batch['anchor']).to(device)
-        pos = model(batch['positive']).to(device)
-        neg = model(batch['negative']).to(device)
+        anchor = model(batch['anchor'].to(device))
+        pos = model(batch['positive'].to(device))
+        neg = model(batch['negative'].to(device))
 
         loss = criterion(anchor, pos, neg)
         total_loss += loss.item()
@@ -28,9 +28,9 @@ def val(model, val_loader, criterion, device):
 
     for batch in val_loader:
 
-        anchor = model(batch['anchor']).to(device)
-        pos = model(batch['positive']).to(device)
-        neg = model(batch['negative']).to(device)
+        anchor = model(batch['anchor'].to(device))
+        pos = model(batch['positive'].to(device))
+        neg = model(batch['negative'].to(device))
         
         loss = criterion(anchor, pos, neg)
         total_loss += loss.item()
