@@ -37,7 +37,6 @@ class TripleTextDataset(Dataset):
         self.dataset = dataset
 
         # Make author-indices mapping
-        print("Mapping authors")
         self.labels_to_indices = defaultdict(list)
         for idx, label in enumerate(dataset['author']):
             self.labels_to_indices[label].append(idx)
@@ -105,7 +104,6 @@ if __name__ == "__main__":
     print("Beginning training")
     for epoch in range(1000):
 
-        print("Computing loss")
         train_loss = train(model, train_loader, optimiser, criterion, device)
         val_loss = val(model, val_loader, criterion, device)
 
