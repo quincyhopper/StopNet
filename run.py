@@ -103,7 +103,7 @@ if __name__ == "__main__":
     early_stop = EarlyStopping(patience=10, model_name="model.pt")
 
     print("Beginning training")
-    for epoch in range(10):
+    for epoch in range(1000):
 
         print("Computing loss")
         train_loss = train(model, train_loader, optimiser, criterion, device)
