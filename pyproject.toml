@@ -1,0 +1,15 @@
+[project]
+name = "neural-func"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "datasets>=4.8.4",
+    "matplotlib>=3.10.8",
+    "nltk>=3.9.4",
+    "numpy>=2.4.4",
+    "pyarrow>=23.0.1",
+    "scikit-learn>=1.8.0",
+    "torch>=2.11.0",
+]
