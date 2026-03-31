@@ -47,7 +47,7 @@ class EarlyStopping:
         self.model_name = model_name
 
     def step(self, model, loss: float, epoch: int ):
-        if loss < self.best_score - self.delta:
+        if loss < self.best_loss - self.delta:
             self.best_loss = loss
             self.count = 0
             self.best_epoch = epoch
