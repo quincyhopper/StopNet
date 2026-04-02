@@ -23,46 +23,44 @@ def split_data(dataset, train=0.8, val=0.1, seed=42):
         dataset.filter(lambda x: x['author'] in train_authors),
         dataset.filter(lambda x: x['author'] in val_authors),
         dataset.filter(lambda x: x['author'] in test_authors)
-    )
+        )
 
 class TripleTextDataset(Dataset):
     def __init__(self, dataset: HFDataset):
         super().__init__()
 
-        self.dataset = dataset
+        self.labels = dataset['author']
+        self.embeddings = dataset['embedding']
 
         # Make author-indices mapping
         self.labels_to_indices = defaultdict(list)
-        for idx, label in enumerate(dataset['author']):
+        for idx, label in enumerate(self.labels):
             self.labels_to_indices[label].append(idx)
 
-        self.unique_labels = list(self.labels_to_indices.keys())
+        self.triplets = self._mine_triplets()
+
+    def _mine_triplets(self):
+        triplets = []
+        for author_idx, label in enumerate(self.labels):
+            pos_candidates = [i for i in self.labels_to_indices[label] if i != author_idx]
+            if not pos_candidates:
+                continue
+            pos_idx = random.choice(pos_candidates)
+            neg_label = random.choice([l for l in self.labels if l != label])
+            neg_idx = random.choice(self.labels_to_indices[neg_label])
+            triplets.append((author_idx, pos_idx, neg_idx))
+        
+        return triplets
 
     def __len__(self):
-        return len(self.dataset)
-    
-    def _get_embedding(self, idx):
-        return torch.tensor(self.dataset[idx]['embedding'], dtype=torch.float)
-    
-    def _sample_positive(self, idx, label):
-        candidates = [i for i in self.labels_to_indices[label] if i != idx]
-        return random.choice(candidates)
-    
-    def _sample_negative(self, label):
-        neg_label = random.choice([l for l in self.unique_labels if l != label])
-        return random.choice(self.labels_to_indices[neg_label])
+        return len(self.triplets)
     
     def __getitem__(self, idx):
-        
-        anchor_label = self.dataset[idx]['author']
-
-        pos_idx = self._sample_positive(idx, anchor_label)
-        neg_idx = self._sample_negative(anchor_label)
-
+        a, p, n = self.triplets[idx]
         return {
-            'anchor': self._get_embedding(idx),
-            'positive': self._get_embedding(pos_idx),
-            'negative': self._get_embedding(neg_idx)
+            'anchor': self.embeddings(a),
+            'positive': self.embeddings(p),
+            'negative': self.embeddings(n)
             }
 
 if __name__ == "__main__":
@@ -98,6 +96,8 @@ if __name__ == "__main__":
 
     print("Beginning training")
     for epoch in range(1000):
+        if epoch != 0:
+            train_ds.triplets = train_ds._mine_triplets()
 
         train_loss = train(model, train_loader, optimiser, criterion, device)
         val_loss = val(model, val_loader, criterion, device)
