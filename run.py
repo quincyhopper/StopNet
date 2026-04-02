@@ -60,9 +60,9 @@ class TripleTextDataset(Dataset):
     def __getitem__(self, idx):
         a, p, n = self.triplets[idx]
         return {
-            'anchor': self.embeddings[a],
-            'positive': self.embeddings[p],
-            'negative': self.embeddings[n]
+            'anchor': torch.tensor(self.embeddings[a], dtype=torch.float),
+            'positive': torch.tensor(self.embeddings[p], dtype=torch.float),
+            'negative': torch.tensor(self.embeddings[n], dtype=torch.float)
             }
 
 if __name__ == "__main__":
