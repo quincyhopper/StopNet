@@ -40,13 +40,15 @@ class TripleTextDataset(Dataset):
         self.triplets = self._mine_triplets()
 
     def _mine_triplets(self):
+        print("Mining triplets", flush=True)
+        unique_labels = list(set(self.labels))
         triplets = []
         for author_idx, label in enumerate(self.labels):
             pos_candidates = [i for i in self.labels_to_indices[label] if i != author_idx]
             if not pos_candidates:
                 continue
             pos_idx = random.choice(pos_candidates)
-            neg_label = random.choice([l for l in self.labels if l != label])
+            neg_label = random.choice([l for l in unique_labels if l != label])
             neg_idx = random.choice(self.labels_to_indices[neg_label])
             triplets.append((author_idx, pos_idx, neg_idx))
         
@@ -58,9 +60,9 @@ class TripleTextDataset(Dataset):
     def __getitem__(self, idx):
         a, p, n = self.triplets[idx]
         return {
-            'anchor': self.embeddings(a),
-            'positive': self.embeddings(p),
-            'negative': self.embeddings(n)
+            'anchor': self.embeddings[a],
+            'positive': self.embeddings[p],
+            'negative': self.embeddings[n]
             }
 
 if __name__ == "__main__":
