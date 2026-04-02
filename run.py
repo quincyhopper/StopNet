@@ -96,7 +96,7 @@ if __name__ == "__main__":
     criterion = nn.TripletMarginLoss()
     early_stop = EarlyStopping(patience=10, model_name="model.pt")
 
-    print("Beginning training")
+    print("Beginning training", flush=True)
     for epoch in range(1000):
         if epoch != 0:
             train_ds.triplets = train_ds._mine_triplets()
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         train_loss = train(model, train_loader, optimiser, criterion, device)
         val_loss = val(model, val_loader, criterion, device)
 
-        print(f"Epoch [{epoch+1}/10] | Train loss: {train_loss:.2f} | Val loss: {val_loss:.2f}")
+        print(f"Epoch [{epoch+1}/10] | Train loss: {train_loss:.2f} | Val loss: {val_loss:.2f}", flush=True)
 
         stop = early_stop.step(model, val_loss, epoch)
         if stop:
