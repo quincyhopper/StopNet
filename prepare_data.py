@@ -21,6 +21,10 @@ def process_batch(batch, stopwords):
         'embedding': vecs,
         }
 
+def zscore_batch(batch, mean, std):
+    normed = (np.array(batch['embedding']) - mean) / std
+    return {'embedding': normed.tolist()}
+
 def filter_valid_authors(ds: Dataset, k: int):
     print("Filtering authors")
 
@@ -51,18 +55,34 @@ if __name__ == "__main__":
     ]
 
     ds = load_dataset(path='parquet', data_files=raw_data, split='train')
-    stopwords = set(stopwords.words('english'))
+    stopwords = sorted(stopwords.words('english'))
 
     # Authors must have at least 
     filtered_ds = filter_valid_authors(ds, 6)
 
+    # Compute raw frequency vectors
     ds = filtered_ds.map(
         process_batch,
         fn_kwargs={'stopwords': stopwords},
         batched=True,
         batch_size=256,
         num_proc=4,
-        remove_columns=['author', 'text', 'source', 'doc_id']
+        remove_columns=['source', 'doc_id']
+    )
+
+    print("Computing mean and std for z-score normalisation")
+    embeddings = np.array(ds['embedding'])          # (N, D)
+    mean = embeddings.mean(axis=0)                  # (D,)
+    std  = embeddings.std(axis=0)                   # (D,)
+    std  = np.where(std == 0, 1.0, std)             # avoid division by zero for constant features
+ 
+    print("Normalising embeddings")
+    ds = ds.map(
+        zscore_batch,
+        fn_kwargs={'mean': mean, 'std': std},
+        batched=True,
+        batch_size=256,
+        num_proc=4,
     )
 
     ds.to_parquet('data/blogtext_processed.parquet')
