@@ -4,8 +4,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 
 from data import split_data, AuthorshipDataset, BalancedBatchSampler
-from loss import batch_hard_triplet_loss
-from training import EarlyStopping
+from loss import batch_hard_triplet_loss, EarlyStopping
 from model import Model
     
 if __name__ == "__main__":
