@@ -3,7 +3,7 @@ import torch
 class EarlyStopping:
     def __init__(self, patience: int, model_name: str, delta: int=1e-4):
         self.patience = patience
-        self.best_loss = +float('inf')
+        self.best_loss = float('inf')
         self.best_epoch = 0
         self.count = 0
         self.delta = delta
