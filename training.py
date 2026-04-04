@@ -1,42 +1,5 @@
 import torch
 
-def train(model, train_loader, optimiser, criterion, device):
-    model.train()
-
-    total_loss = 0.0
-    
-    for batch in train_loader:
-        optimiser.zero_grad()
-
-        anchor = model(batch['anchor'].to(device))
-        pos = model(batch['positive'].to(device))
-        neg = model(batch['negative'].to(device))
-
-        loss = criterion(anchor, pos, neg)
-        total_loss += loss.item()
-
-        loss.backward()
-        optimiser.step()
-
-    return total_loss / len(train_loader)
-
-@torch.no_grad()
-def val(model, val_loader, criterion, device):
-    model.eval()
-
-    total_loss = 0.0
-
-    for batch in val_loader:
-
-        anchor = model(batch['anchor'].to(device))
-        pos = model(batch['positive'].to(device))
-        neg = model(batch['negative'].to(device))
-        
-        loss = criterion(anchor, pos, neg)
-        total_loss += loss.item()
-
-    return total_loss / len(val_loader)
-
 class EarlyStopping:
     def __init__(self, patience: int, model_name: str, delta: int=1e-4):
         self.patience = patience
